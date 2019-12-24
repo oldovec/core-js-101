@@ -21,6 +21,7 @@
  *   '{21EC2020-3AEA-4069-A2DD-08002B30309D}'
  *   '{0c74f13f-fa83-4c48-9b33-68921dd72463}'
  *
+ *
  *  Do not match:
  *   '{D44EF4F4-280B47E5-91C7-261222A59621}'
  *   '{D1A5279D-B27D-4CD4-A05E-EFDH53D08E8D}'
@@ -32,7 +33,7 @@
  * @return {RegExp}
  */
 function getRegexForGuid() {
-  throw new Error('Not implemented');
+  return /{[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}/;
 }
 
 
@@ -54,7 +55,7 @@ function getRegexForGuid() {
  *
  */
 function getRegexForPitSpot() {
-  throw new Error('Not implemented');
+  return /pi|sp|sl|re/;
 }
 
 
@@ -78,8 +79,8 @@ function getRegexForPitSpot() {
  *   'PASSW0RD'.match(validator)  => false
  *   'Pa55'.match(validator) => false
  */
-function getPasswordValidator(/* minLength */) {
-  throw new Error('Not implemented');
+function getPasswordValidator(minLength) {
+  return new RegExp(`^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[0-9a-zA-Z]{${minLength},}$`);
 }
 
 

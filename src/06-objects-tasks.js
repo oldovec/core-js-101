@@ -20,8 +20,10 @@
  *    console.log(r.height);      // => 20
  *    console.log(r.getArea());   // => 200
  */
-function Rectangle(/* width, height */) {
-  throw new Error('Not implemented');
+function Rectangle(width, height) {
+  this.width = width;
+  this.height = height;
+  this.getArea = () => this.width * this.height;
 }
 
 
@@ -35,8 +37,8 @@ function Rectangle(/* width, height */) {
  *    [1,2,3]   =>  '[1,2,3]'
  *    { width: 10, height : 20 } => '{"height":10,"width":20}'
  */
-function getJSON(/* obj */) {
-  throw new Error('Not implemented');
+function getJSON(obj) {
+  return JSON.stringify(obj);
 }
 
 
@@ -51,8 +53,12 @@ function getJSON(/* obj */) {
  *    const r = fromJSON(Circle.prototype, '{"radius":10}');
  *
  */
-function fromJSON(/* proto, json */) {
-  throw new Error('Not implemented');
+function fromJSON(proto, json) {
+  function constructor() {}
+  constructor.prototype = proto;
+  const obj = JSON.parse(json);
+  const res = new constructor();
+  return Object.assign(res, obj);
 }
 
 
@@ -111,32 +117,71 @@ function fromJSON(/* proto, json */) {
  */
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  total: '',
+  prev: '',
+  elOc: false,
+  idOc: false,
+  pElOc: false,
+  erAlrOc: Error('Element, id and pseudo-element should not occur more then one time inside the selector'),
+  erWOrd: Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'),
+
+  element(value) {
+    const {
+      elOc, erAlrOc, erWOrd, prev,
+    } = this;
+    if (elOc) throw erAlrOc;
+    if (prev !== '') throw erWOrd;
+    return {
+      ...this, prev: 'elem', elOc: true, total: `${this.total}${value}`,
+    };
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    const {
+      idOc, erAlrOc, erWOrd, prev,
+    } = this;
+    if (idOc) throw erAlrOc;
+    if (prev === 'class' || prev === 'pseudoElem') throw erWOrd;
+    return {
+      ...this, prev: 'id', idOc: true, total: `${this.total}#${value}`,
+    };
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    const { erWOrd, prev } = this;
+    if (prev === 'attr') throw erWOrd;
+    return { ...this, prev: 'class', total: `${this.total}.${value}` };
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    const { erWOrd, prev } = this;
+    if (prev === 'pseudoClass') throw erWOrd;
+    return { ...this, prev: 'attr', total: `${this.total}[${value}]` };
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    const { erWOrd, prev } = this;
+    if (prev === 'pseudoElem') throw erWOrd;
+    return { ...this, prev: 'pseudoClass', total: `${this.total}:${value}` };
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    const { pElOc, erAlrOc } = this;
+    if (pElOc) throw erAlrOc;
+    return {
+      ...this, prev: 'pseudoElem', pElOc: true, total: `${this.total}::${value}`,
+    };
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    return {
+      ...this,
+      total: `${selector1.total} ${combinator} ${selector2.total}`,
+    };
+  },
+
+  stringify() {
+    return this.total;
   },
 };
 
